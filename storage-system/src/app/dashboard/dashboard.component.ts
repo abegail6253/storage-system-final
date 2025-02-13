@@ -172,6 +172,7 @@ uploadFileToServer(file: File, index: number): void {
         reportProgress: true
     }).subscribe(
         (event) => {
+          console.log(event.type)
             if (event.type === HttpEventType.UploadProgress && event.total) {
                 const progress = Math.round(100 * event.loaded / event.total);
                 this.fileProgress[file.name] = progress;
