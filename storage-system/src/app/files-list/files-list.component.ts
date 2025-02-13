@@ -45,6 +45,8 @@ export class FilesListComponent implements OnInit {
   searchQuery: string = ''; // Make sanitizer public
   viewMode: string = 'list';
   menu: any;
+  sortDropdownVisible: boolean = false;
+  filterDropdownVisible: boolean = false;
   selectAllChecked: boolean = false;
   bulkActionMode = false;
   selectedBulkAction: string = '';
@@ -66,6 +68,16 @@ export class FilesListComponent implements OnInit {
     this.getFiles();
     this.searchFiles();
     
+  }
+  
+
+  toggleSortDropdown() {
+    this.sortDropdownVisible = !this.sortDropdownVisible;
+  }
+
+  // Method to toggle the filter dropdown visibility
+  toggleFilterDropdown() {
+    this.filterDropdownVisible = !this.filterDropdownVisible;
   }
 
   toggleActions(file: File) {
@@ -145,14 +157,14 @@ export class FilesListComponent implements OnInit {
         return file.mimeType.startsWith('video/');
       }
       if (this.fileType === 'application/zip') {
-        return file.mimeType === 'application/zip'; // Add this condition for zip files
+        return file.mimeType === 'application/zip'; 
       }
       return this.fileType ? file.mimeType === this.fileType : true;
     });
-  
+
     this.filteredFiles.sort((a, b) => {
       let comparison = 0;
-  
+
       if (this.sortBy === 'date') {
         comparison = a.createdAt.getTime() - b.createdAt.getTime();
       } else if (this.sortBy === 'size') {
@@ -162,38 +174,35 @@ export class FilesListComponent implements OnInit {
       } else if (this.sortBy === 'name') {
         comparison = a.filename.localeCompare(b.filename);
       }
-  
-      // If sortOrder is 'desc', reverse the comparison result
+
       return this.sortOrder === 'asc' ? comparison : -comparison;
     });
   }
 
   isZip(file: File): boolean {
-    return file.mimeType === 'application/zip';  // Check if the file is of type ZIP
+    return file.mimeType === 'application/zip';
   }
 
-  // Sort files based on selected criteria
   sortFiles() {
-    this.applyFilters(); // Apply filters to sort the files
+    this.applyFilters();
   }
 
-  // Filter files by type
   filterByType() {
-    console.log('Filtering by type:', this.fileType); // Add this line to debug
-    this.applyFilters(); // Apply filters based on selected file type
+    console.log('Filtering by type:', this.fileType);
+    this.applyFilters();
   }
 
-  // Function to toggle rename mode
   toggleRenameMode(file: File) {
-    file.renameMode = !file.renameMode; // Toggle the rename mode
-  }  
+    file.renameMode = !file.renameMode;
+  }
 
   toggleSortOrder() {
-    // Toggle the sort order between 'asc' and 'desc'
     this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-    // After toggling, you might want to apply the sorting again
     this.sortFiles();
   }
+  
+  
+
 
   toggleBulkActionMode() {
     this.bulkActionMode = !this.bulkActionMode;

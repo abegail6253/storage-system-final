@@ -11,13 +11,27 @@
 
     <!-- Sort Options -->
     <div class="sort-options">
-      <label>Sort By:</label>
-      <select [(ngModel)]="sortBy" (change)="sortFiles()">
-        <option value="date">Date</option>
-        <option value="size">File Size</option>
-        <option value="name">Name</option>
-      </select>
+      <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort Options">
+        <mat-icon>sort</mat-icon>
+      </button>
+      
+      <!-- Sort Menu Popup -->
+      <mat-menu #sortMenu="matMenu">
+        <button mat-menu-item (click)="sortBy = 'date'; sortFiles()">
+          <mat-icon>calendar_today</mat-icon>
+          <span>Sort by Date</span>
+        </button>
+        <button mat-menu-item (click)="sortBy = 'size'; sortFiles()">
+          <mat-icon>storage</mat-icon>
+          <span>Sort by Size</span>
+        </button>
+        <button mat-menu-item (click)="sortBy = 'name'; sortFiles()">
+          <mat-icon>text_fields</mat-icon>
+          <span>Sort by Name</span>
+        </button>
+      </mat-menu>
     </div>
+
 
     <!-- Toggle Sort Order with Icons Only -->
     <div class="sort-order-toggle">
@@ -28,16 +42,37 @@
 
     <!-- Filter by File Type -->
     <div class="file-type-filter">
-      <label>Filter By:</label>
-      <select [(ngModel)]="fileType" (change)="filterByType()">
-        <option value="">All</option>
-        <option value="application/pdf">PDF</option>
-        <option value="application/msword">Word</option>
-        <option value="video/*">Videos</option>
-        <option value="image/jpeg">JPEG Image</option>
-        <option value="image/png">PNG Image</option>
-        <option value="application/zip">ZIP</option>
-      </select>
+      <button mat-icon-button [matMenuTriggerFor]="filterMenu" aria-label="Filter Options">
+        <mat-icon>filter_list</mat-icon>
+      </button>
+    
+      <!-- Filter Menu Popup -->
+      <mat-menu #filterMenu="matMenu">
+        <button mat-menu-item (click)="fileType = ''; filterByType()">
+          <mat-icon>all_inclusive</mat-icon>
+          <span>All</span>
+        </button>
+        <button mat-menu-item (click)="fileType = 'application/pdf'; filterByType()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          <span>PDF</span>
+        </button>
+        <button mat-menu-item (click)="fileType = 'application/msword'; filterByType()">
+          <mat-icon>description</mat-icon>
+          <span>Word</span>
+        </button>
+        <button mat-menu-item (click)="fileType = 'image/jpeg'; filterByType()">
+          <mat-icon>image</mat-icon>
+          <span>JPEG</span>
+        </button>
+        <button mat-menu-item (click)="fileType = 'image/png'; filterByType()">
+          <mat-icon>image</mat-icon>
+          <span>PNG</span>
+        </button>
+        <button mat-menu-item (click)="fileType = 'application/zip'; filterByType()">
+          <mat-icon>archive</mat-icon>
+          <span>ZIP</span>
+        </button>
+      </mat-menu>
     </div>
 
     <!-- Toggle for Bulk Actions -->
