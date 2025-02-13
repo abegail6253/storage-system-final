@@ -1,0 +1,10 @@
+<!-- Show Main Layout if logged in and not on login page -->
+<app-main-layout *ngIf="isLoggedIn && !isLoginPage">
+    <router-outlet></router-outlet>
+  </app-main-layout>
+  
+  <!-- Show login page if not logged in -->
+  <div *ngIf="!isLoggedIn || isLoginPage">
+    <router-outlet></router-outlet>  <!-- This will show the login component when on the login route -->
+  </div>
+  
