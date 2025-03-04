@@ -10,82 +10,99 @@
     
 
     <!-- Sort Options -->
+    
     <div class="sort-options">
-      <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort Options">
-        <mat-icon>sort</mat-icon>
+      <!-- Sort Button -->
+      <button mat-button [matMenuTriggerFor]="sortMenu" aria-label="Sort Options">
+        <mat-icon>{{ selectedSortIcon }}</mat-icon> {{ selectedSortText }}
       </button>
-      
+
       <!-- Sort Menu Popup -->
       <mat-menu #sortMenu="matMenu">
-        <button mat-menu-item (click)="sortBy = 'date'; sortFiles()">
+        <button mat-menu-item (click)="setSortOption('date', 'Sort by Date', 'calendar_today')">
           <mat-icon>calendar_today</mat-icon>
           <span>Sort by Date</span>
         </button>
-        <button mat-menu-item (click)="sortBy = 'size'; sortFiles()">
+        <button mat-menu-item (click)="setSortOption('size', 'Sort by Size', 'storage')">
           <mat-icon>storage</mat-icon>
           <span>Sort by Size</span>
         </button>
-        <button mat-menu-item (click)="sortBy = 'name'; sortFiles()">
+        <button mat-menu-item (click)="setSortOption('name', 'Sort by Name', 'text_fields')">
           <mat-icon>text_fields</mat-icon>
           <span>Sort by Name</span>
         </button>
       </mat-menu>
     </div>
-
-
-    <!-- Toggle Sort Order with Icons Only -->
-    <div class="sort-order-toggle">
-      <button class="small-button" (click)="toggleSortOrder()">
-        <mat-icon class="sort-icon">{{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-      </button>
-    </div>
+    
 
     <!-- Filter by File Type -->
-    <div class="file-type-filter">
-      <button mat-icon-button [matMenuTriggerFor]="filterMenu" aria-label="Filter Options">
-        <mat-icon>filter_list</mat-icon>
-      </button>
-    
-      <!-- Filter Menu Popup -->
-      <mat-menu #filterMenu="matMenu">
-        <button mat-menu-item (click)="fileType = ''; filterByType()">
-          <mat-icon>all_inclusive</mat-icon>
-          <span>All</span>
-        </button>
-        <button mat-menu-item (click)="fileType = 'application/pdf'; filterByType()">
-          <mat-icon>picture_as_pdf</mat-icon>
-          <span>PDF</span>
-        </button>
-        <button mat-menu-item (click)="fileType = 'application/msword'; filterByType()">
-          <mat-icon>description</mat-icon>
-          <span>Word</span>
-        </button>
-        <button mat-menu-item (click)="fileType = 'image/jpeg'; filterByType()">
-          <mat-icon>image</mat-icon>
-          <span>JPEG</span>
-        </button>
-        <button mat-menu-item (click)="fileType = 'image/png'; filterByType()">
-          <mat-icon>image</mat-icon>
-          <span>PNG</span>
-        </button>
-        <button mat-menu-item (click)="fileType = 'application/zip'; filterByType()">
-          <mat-icon>archive</mat-icon>
-          <span>ZIP</span>
-        </button>
-      </mat-menu>
-    </div>
+<!-- Filter by File Type -->
+<div class="file-type-filter">
+  <!-- Filter Button -->
+  <button mat-button [matMenuTriggerFor]="filterMenu" aria-label="Filter Options">
+    <mat-icon>{{ selectedFilterIcon }}</mat-icon> {{ selectedFilterText }}
+  </button>
 
-    <!-- Toggle for Bulk Actions -->
-<button (click)="toggleBulkActionMode()" class="bulk-action-toggle" mat-icon-button aria-label="Toggle Bulk Actions">
-  <mat-icon>{{ bulkActionMode ? 'close' : 'select_all' }}</mat-icon>
+  <!-- Filter Menu Popup -->
+  <mat-menu #filterMenu="matMenu">
+    <button mat-menu-item (click)="setFilterOption('', 'Filter by Type', 'all_inclusive')">
+      <mat-icon>all_inclusive</mat-icon>
+      <span>All</span>
+    </button>
+    <button mat-menu-item (click)="setFilterOption('application/pdf', 'PDF', 'picture_as_pdf')">
+      <mat-icon>picture_as_pdf</mat-icon>
+      <span>PDF</span>
+    </button>
+    <button mat-menu-item (click)="setFilterOption('application/msword', 'Word', 'description')">
+      <mat-icon>description</mat-icon>
+      <span>Word</span>
+    </button>
+    <button mat-menu-item (click)="setFilterOption('image/jpeg', 'JPEG', 'image')">
+      <mat-icon>image</mat-icon>
+      <span>JPEG</span>
+    </button>
+    <button mat-menu-item (click)="setFilterOption('image/png', 'PNG', 'image')">
+      <mat-icon>image</mat-icon>
+      <span>PNG</span>
+    </button>
+    <button mat-menu-item (click)="setFilterOption('application/zip', 'ZIP', 'archive')">
+      <mat-icon>archive</mat-icon>
+      <span>ZIP</span>
+    </button>
+  </mat-menu>
+</div>
+
+
+
+    <!-- Bulk Actions and Sort Order Toggle -->
+    <div class="bulk-and-sort-order">
+      <!-- Toggle for Bulk Actions -->
+      <button (click)="toggleBulkActionMode()" class="bulk-action-toggle" mat-button aria-label="Bulk Actions">
+        <mat-icon>{{ bulkActionMode ? 'close' : 'select_all' }}</mat-icon>
+        Bulk Actions
+      </button>
+
+      <!-- Toggle Sort Order Button with blue theme -->
+<button class="sort-order-toggle small-button blue-theme-button" (click)="toggleSortOrder()">
+  <mat-icon class="sort-icon">{{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
 </button>
+
+    </div>
   </div>
+
+  
+</div>
 
   <!-- File Statistics -->
   <div class="file-statistics">
     <p><strong>Total Files:</strong> {{ statistics.totalFiles }}</p>
-    <p><strong>Total Size:</strong> {{ statistics.totalSizeMB }} MB ({{ statistics.totalSize }} bytes)</p>
+    <p><strong>Total Size:</strong> 
+      {{ statistics.totalSizeGB > 0 ? statistics.totalSizeGB + ' GB' : 
+         statistics.totalSizeMB > 0 ? statistics.totalSizeMB + ' MB' : 
+         statistics.totalSizeKB + ' KB' }}
+    </p>
   </div>
+  
 
   <!-- View Toggle with Icons Only -->
   <div class="view-toggle" style="margin-bottom: 20px;">

@@ -322,4 +322,37 @@ img {
     font-size: 24px;
     color: #2ecc71; /* Green color for success */
   }
+  /* Styling for the error message */
+.error-message {
+    background-color: #f8d7da; /* Light red background for error */
+    color: #721c24; /* Dark red text color */
+    border: 1px solid #f5c6cb; /* Light red border */
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  /* Optional: Add an icon next to the error message */
+  .error-message p::before {
+    content: "\26A0"; /* Warning sign character */
+    margin-right: 10px;
+    font-size: 18px;
+  }
+  .cancel-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .cancel-button:hover {
+    background-color: #c0392b;
+  }
+  
+  
 

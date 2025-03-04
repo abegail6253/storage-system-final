@@ -1,4 +1,4 @@
-<div class="upload-container" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+<div class="upload-container" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [ngClass]="{'drag-over': isDragOver}">
   <h2>
     Upload Files
     <span class="material-icons">upload</span>
@@ -7,6 +7,11 @@
   <!-- File input for manual selection -->
   <input type="file" (change)="onFilesSelected($event)" multiple name="files" #fileInput />
   <p>Or drag and drop your files here</p>
+
+  <!-- Error Message for failed uploads -->
+  <div *ngIf="uploadErrorMessage" class="error-message">
+    <p>{{ uploadErrorMessage }}</p>
+  </div>
 
   <!-- Selected files table -->
   <div *ngIf="uploadedFiles && uploadedFiles.length > 0">
@@ -17,7 +22,9 @@
           <th>Preview</th>
           <th>File Name</th>
           <th>File Type</th>
+          <th>File Size</th>
           <th>Progress</th>
+          <th>Cancel</th> <!-- New column for cancel button -->
         </tr>
       </thead>
       <tbody>
@@ -37,8 +44,9 @@
               <mat-icon *ngIf="isZip(file)" style="color: #2980b9;">archive</mat-icon>
             </div>
           </td>
-          <td>{{ file.name }}</td>
+          <td>{{ file.name.length > 20 ? file.name.slice(0, 17) + '...' : file.name }}</td> <!-- Clip filenames longer than 20 characters -->
           <td>{{ file.type }}</td>
+          <td>{{ file.size | formatFileSize }}</td> <!-- Display file size -->
           <td>
             <!-- Show progress bar or checkmark based on upload progress -->
             <div *ngIf="fileProgress[file.name] !== undefined" class="progress-container">
@@ -53,6 +61,10 @@
                 <mat-icon style="color: #2ecc71; font-size: 24px;">check_circle</mat-icon>
               </div>
             </div>
+          </td>
+          <td>
+            <!-- Cancel button to remove file -->
+            <button (click)="removeFile(i)" class="cancel-button">Cancel</button>
           </td>
         </tr>
       </tbody>

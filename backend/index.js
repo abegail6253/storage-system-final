@@ -48,33 +48,32 @@ if (!fs.existsSync(uploadDirectory)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDirectory); // Save files in the uploads directory
+    const uploadPath = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     let originalName = file.originalname;
+    const uploadPath = path.join(__dirname, 'uploads');
     let fileName = originalName;
-    let counter = 1;
-
-    // Get the file extension
-    const fileExtension = path.extname(originalName);
-    const baseName = path.basename(originalName, fileExtension);
+    let fileExtension = path.extname(originalName);
+    let baseName = path.basename(originalName, fileExtension);
     
-    // Check if the file already exists and rename it if needed
-    while (fs.existsSync(path.join(uploadDirectory, fileName))) {
-      // Append a counter in parentheses to the file name if it already exists
+    let counter = 1;
+    
+    // Check if the file with the same name already exists
+    while (fs.existsSync(path.join(uploadPath, fileName))) {
       fileName = `${baseName} (${counter})${fileExtension}`;
       counter++;
     }
 
-    // Return the file with its original extension intact
     cb(null, fileName);
-  },
+  }
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 4 * 1024 * 1024 * 1024 } // 4GB limit
-});
+const upload = multer({ storage: storage });
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -177,6 +176,15 @@ app.get('/files', (req, res) => {
         totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2), // Total size in MB
       }
     });
+  });
+});
+
+app.get('/files/existing', (req, res) => {
+  fs.readdir(uploadDirectory, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error reading directory' });
+    }
+    res.json({ existingFiles: files });
   });
 });
 

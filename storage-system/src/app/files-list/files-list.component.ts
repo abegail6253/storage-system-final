@@ -39,7 +39,6 @@ export class FilesListComponent implements OnInit {
   files: File[] = []; // Use the File interface for the files array
   filteredFiles: File[] = []; // Filtered list of files
   sortBy: string = 'date';  // Default sort by date
-  sortOrder: string = 'desc';
   fileType: string = '';    // New property to filter by file type
   safeUrl?: SafeResourceUrl; // Make safeUrl optional or initialize with null
   searchQuery: string = ''; // Make sanitizer public
@@ -47,18 +46,27 @@ export class FilesListComponent implements OnInit {
   menu: any;
   sortDropdownVisible: boolean = false;
   filterDropdownVisible: boolean = false;
+  selectedFilterIcon: string = 'all_inclusive'; // Default icon
+  selectedFilterText: string = 'Filter by Type'; // Default text
+  selectedSortOption: string = 'date';
+  selectedSortText: string = 'Sort by Date';
+  selectedSortIcon: string = 'calendar_today';
+  sortOrder: string = 'desc';
   selectAllChecked: boolean = false;
   bulkActionMode = false;
   selectedBulkAction: string = '';
+  currentSortLabel = 'Sort by';
   showCheckboxes: boolean = false;
   showActionsForFile: File | null = null;
   showActions: boolean = false;
   statistics = {
     totalFiles: 0,
     totalSize: 0,
+    totalSizeKB: 0,  // Add totalSizeKB here
     totalSizeMB: 0,
     totalSizeGB: 0 
   };
+  
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer, private cd: ChangeDetectorRef) {
     this.sanitizer = sanitizer;
@@ -84,16 +92,46 @@ export class FilesListComponent implements OnInit {
     this.showActionsForFile = this.showActionsForFile === file ? null : file; // Toggle visibility of actions for the file
     this.showActions = !this.showActions; // Toggle the actions visibility
   }
-
   
 
-  
 
   searchFiles() {
     // Apply the search filter to the list of files
     this.filteredFiles = this.files.filter(file =>
       file.filename.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
+  }
+  setFilterOption(fileType: string, filterText: string, filterIcon: string) {
+    this.fileType = fileType;
+    this.selectedFilterText = filterText;
+    this.selectedFilterIcon = filterIcon;
+    this.filterByType(); // Call the filter logic
+  }
+  sortedFiles() {
+    return this.filteredFiles.sort((a, b) => {
+      let comparison = 0;
+
+      if (this.selectedSortOption === 'name') {
+        comparison = a.filename.localeCompare(b.filename);
+      } else if (this.selectedSortOption === 'size') {
+        comparison = Number(a.size) - Number(b.size);
+      } else if (this.selectedSortOption === 'date') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+
+      return this.sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }
+
+  setSortOption(option: string, text: string, icon: string) {
+    this.selectedSortOption = option;
+    this.selectedSortText = text;
+    this.selectedSortIcon = icon;
+    this.sortFiles();
+  }
+
+  updateSortLabel(option: string) {
+    this.currentSortLabel = 'Sort by ' + option;
   }
 
   // Method to fetch files from backend
@@ -127,21 +165,33 @@ export class FilesListComponent implements OnInit {
     this.statistics.totalFiles = this.files.length;
     this.statistics.totalSize = this.files.reduce((total, file) => total + (typeof file.size === 'string' ? parseInt(file.size, 10) : file.size), 0);
     
-    // Convert total size to MB
-    this.statistics.totalSizeMB = parseFloat((this.statistics.totalSize / (1024 * 1024)).toFixed(2)); // Convert to MB
-    
-    // Convert total size to GB
-    this.statistics.totalSizeGB = parseFloat((this.statistics.totalSize / (1024 * 1024 * 1024)).toFixed(2)); // Convert to GB
-
-    this.cd.detectChanges();
-    
-    // Display total size in GB or MB depending on the size
-    if (this.statistics.totalSizeGB >= 1) {
-        console.log(`Total Size: ${this.statistics.totalSizeGB} GB`);
+    // Convert total size to KB, MB, or GB
+    const totalSizeKB = this.statistics.totalSize / 1024;  // Total size in KB
+    const totalSizeMB = totalSizeKB / 1024;  // Total size in MB
+    const totalSizeGB = totalSizeMB / 1024;  // Total size in GB
+  
+    // Update the statistics with the proper unit
+    if (totalSizeGB >= 1) {
+      this.statistics.totalSizeGB = parseFloat(totalSizeGB.toFixed(2)); // Show GB if the size is >= 1 GB
+      this.statistics.totalSizeMB = 0; // Reset MB
+      this.statistics.totalSizeKB = 0; // Reset KB
+    } else if (totalSizeMB >= 1) {
+      this.statistics.totalSizeMB = parseFloat(totalSizeMB.toFixed(2)); // Show MB if the size is >= 1 MB but < 1 GB
+      this.statistics.totalSizeKB = 0; // Reset KB
+      this.statistics.totalSizeGB = 0; // Reset GB
+    } else if (totalSizeKB >= 1) {
+      this.statistics.totalSizeKB = parseFloat(totalSizeKB.toFixed(2)); // Show KB if the size is < 1 MB
+      this.statistics.totalSizeMB = 0; // Reset MB
+      this.statistics.totalSizeGB = 0; // Reset GB
     } else {
-        console.log(`Total Size: ${this.statistics.totalSizeMB} MB`);
+      this.statistics.totalSizeKB = parseFloat(totalSizeKB.toFixed(2)); // For very small sizes, show in KB
+      this.statistics.totalSizeMB = 0;
+      this.statistics.totalSizeGB = 0;
     }
-}
+  
+    this.cd.detectChanges();
+  }
+  
 
   
 
@@ -185,6 +235,7 @@ export class FilesListComponent implements OnInit {
 
   sortFiles() {
     this.applyFilters();
+    console.log('Sorting files by:', this.sortBy);
   }
 
   filterByType() {
@@ -349,18 +400,22 @@ export class FilesListComponent implements OnInit {
   getFormattedFileSize(size: string | number): string {
     // Convert string to number if necessary
     const fileSize = typeof size === 'string' ? parseInt(size, 10) : size;
-  
+    
     const kb = fileSize / 1024;
     const mb = kb / 1024;
+    const gb = mb / 1024;
   
-    if (kb >= 1000) {
-      return `${mb.toFixed(2)} MB`;  // Display size in MB if it's over 1000 KB
+    if (gb >= 1) {
+      return `${gb.toFixed(2)} GB`;  // If file size >= 1 GB
+    } else if (mb >= 1) {
+      return `${mb.toFixed(2)} MB`;  // If file size >= 1 MB but < 1 GB
     } else if (kb >= 1) {
-      return `${kb.toFixed(2)} KB`;  // Display size in KB for sizes under 1000 KB
+      return `${kb.toFixed(2)} KB`;  // If file size >= 1 KB but < 1 MB
     } else {
-      return `${fileSize} bytes`;  // Return the exact byte size for very small files
+      return `${fileSize} bytes`;  // If file size < 1 KB
     }
   }
+  
   
 
   // Function to check if the file is an image for preview
