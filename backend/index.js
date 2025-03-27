@@ -13,23 +13,27 @@ require('dotenv').config();
 
 // Initialize Express app
 const app = express();
-const port = 3000;
+const port = 3001;
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: 'http://localhost:4200',  // Allow requests from your Angular frontend
-  methods: ['GET', 'POST', 'DELETE', 'PUT'],  // Allow PUT method as well
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Allow Authorization header
+  origin: 'http://localhost:4200',  
+  methods: ['GET', 'POST', 'DELETE', 'PUT'],  
+  allowedHeaders: ['Content-Type', 'Authorization'],  
 }));
 
 // Body parser middleware
 app.use(express.json());
 
+
+
+
+
 // MySQL connection
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'Developer123!@#',  // Replace with your MySQL password
+  password: 'developer',  // Replace with your MySQL password
   database: 'dtr_db',  // Replace with your database name
 });
 
@@ -178,6 +182,8 @@ app.get('/files', (req, res) => {
     });
   });
 });
+
+
 
 app.get('/files/existing', (req, res) => {
   fs.readdir(uploadDirectory, (err, files) => {
@@ -357,6 +363,12 @@ app.put('/files/rename', (req, res) => {
   });
 });
 
+app.use(express.static(path.join(__dirname, 'public', 'storage-system', 'browser')));
+
+// Handle client-side routing by serving the index.html file (placed after all API routes)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'storage-system', 'browser', 'index.html'));
+});
 
 
 
